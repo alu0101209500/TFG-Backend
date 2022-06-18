@@ -6,7 +6,10 @@ const ServiceSchema = new mongoose.Schema({
     serviceDesc: {type: String, required: true},
     images: {type: String, required: false},
     videos: {type: String, required: false},
-    postedAt: {type: Number, required: false}
+    postedAt: {type: Number, required: false},
+    price: {type: Number, required: true},
+    priceType: {type: String, required: true},
+    tags: {type: Array, required: false}
 });
 
 

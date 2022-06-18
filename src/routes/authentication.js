@@ -1,6 +1,6 @@
+const utilityFunctions = require("../utils/utilityFunctions");
 const jwt = require('jsonwebtoken');
 const userUtils = require('../database/dbaccess/userUtils');
-
 const authSecret = 'aJDvksKOndi21FKDSasvbniopADpvi';
 
 module.exports = function(app) {
@@ -19,6 +19,7 @@ module.exports = function(app) {
           if (value == true) {
             let token = jwt.sign({username: auxArr[0]}, authSecret, {expiresIn: "2h"});
             userUtils.returnCleanUser(auxArr[0]).then((value) => {
+              utilityFunctions.recordLog(`[AUTH] - USER LOGGED-IN: ${auxArr[0]}  \n\tProxy-forwarded address: ${req.headers['x-forwarded-for']} \n\tRemote address: ${req.connection.remoteAddress}\n\tUser-Agent:${req.header['user-agent']} \n\tReferrer: ${ req.header['referrer']}`);
               res.send(JSON.stringify({
                 type: "res",
                 status: "true",
@@ -29,6 +30,7 @@ module.exports = function(app) {
             }).catch((e) => {throw e})
             
           } else {
+            utilityFunctions.recordLog(`[AUTH] - FAILED ATTEMPT TO LOG-IN - User: ${auxArr[0]}  \n\tProxy-forwarded address: ${req.headers['x-forwarded-for']} \n\tRemote address: ${req.connection.remoteAddress}\n\tUser-Agent:${req.header['user-agent']} \n\tReferrer: ${ req.header['referrer']}`);
             res.send(JSON.stringify({
               type: "res",
               status: "false",
@@ -36,10 +38,15 @@ module.exports = function(app) {
             }));
           }
         }).catch((e) => {
-          throw e;
+          utilityFunctions.recordLog(`[AUTH] [ERROR] - ERROR DURING ATTEMPT TO LOG-IN - User: ${auxArr[0]} \n\tProxy-forwarded address: ${req.headers['x-forwarded-for']} \n\tRemote address: ${req.connection.remoteAddress}\n\tUser-Agent:${req.header['user-agent']} \n\tReferrer: ${ req.header['referrer']}`);
+          res.send(JSON.stringify({
+            type: "err",
+            msg: "Request not valid: " + e
+          }));
         })
       }
     } catch (err) {
+      utilityFunctions.recordLog(`[AUTH] [ERROR] - ERROR DURING ATTEMPT TO LOG-IN  \n\tProxy-forwarded address: ${req.headers['x-forwarded-for']} \n\tRemote address: ${req.connection.remoteAddress}\n\tUser-Agent:${req.header['user-agent']} \n\tReferrer: ${ req.header['referrer']}`);
       res.send(JSON.stringify({
         type: "err",
         msg: "Request not valid: " + err

@@ -1,6 +1,3 @@
-nodemailer = require('nodemailer');
-const {google} = require('googleapis');
-
 fs = require('fs');
 
 function recordLog(msg) {

@@ -1,5 +1,3 @@
-const { domains } = require("googleapis/build/src/apis/domains");
-
 let servicesModule = require("../../index.js").servicesDB
 
 function getAllServices(page, ipp){
@@ -26,16 +24,67 @@ function getUserServices(user){
     })
 }
 
-function searchServices(query, page, ipp) {
+function searchServices(query, page, ipp, filters) {
+    //Query base
+    query= {
+        $and:[
+            {
+                $or: [
+                    {serviceName: { "$regex": String(query), "$options": "i" } },
+                    {serviceDesc: { "$regex": String(query), "$options": "i" } },
+                    {postedBy: query}
+                ]
+            }
+        ]
+        
+    }
+
+    //Filtrado de fechas
+    let aux = {
+        postedAt: {}
+    };
+
+    if(filters.datefrom)
+        aux.postedAt.$gte = filters.datefrom
+    if(filters.dateto)
+        aux.postedAt.$lte = filters.dateto
+
+    if(Object.keys(aux.postedAt).length > 0)
+        query.$and.push(aux);
+
+    //Filtrado de precio
+    aux = {
+        price: {}
+    };
+    
+    if(filters.pricefrom)
+        aux.price.$gte = filters.pricefrom
+    if(filters.priceto)
+        aux.price.$lte = filters.priceto
+
+    if(Object.keys(aux.price).length > 0)
+        query.$and.push(aux);
+    
+    //Tipo de precio
+    if(filters.priceType == "Por hora" || filters.priceType == "Total") {
+        aux = {
+            priceType: filters.priceType
+        }
+        query.$and.push(aux)
+    }
+
+    //Tags
+    for(let i in filters.tags) {
+        aux = {
+            tags: String(filters.tags[i])
+        }
+        query.$and.push(aux)
+    }
+    console.log(filters)
     page = Number(page);
     ipp = Number(ipp);
     return new Promise((res, rej) => {
-        servicesModule.find({
-            $or: [
-                {serviceName: { "$regex": String(query), "$options": "i" } },
-                {serviceDesc: { "$regex": String(query), "$options": "i" } },
-                {postedBy: query}
-            ]}, {}, {skip: page*ipp, limit: ipp}).then((list) => {
+        servicesModule.find(query, {}, {sort: { 'postedAt' : -1 }, skip: page*ipp, limit: ipp}).then((list) => {
                 res(list);
         }).catch((err) => {
             rej(err);
@@ -51,7 +100,10 @@ function postNewService(user, serviceInfo) {
         serviceDesc: serviceInfo.serviceDesc,
         images: serviceInfo.images,
         videos: serviceInfo.videos,
-        postedAt: now.getTime()
+        postedAt: now.getTime(),
+        price: serviceInfo.price,
+        priceType: serviceInfo.priceType,
+        tags: [...serviceInfo.tags]
     });
     return new Promise((res, rej) => {
         newService.save().then((doc) => {
@@ -73,11 +125,11 @@ function deleteOneService(user, id) {
                     if(deletions.deletedCount == 0) {
                         rej(`Service with id ${id} does not exist`)
                     } else {
-                        res("User succesfully deleted");
+                        res("Service succesfully deleted");
                     }       
                 })
             } else {
-                rej(`User ${user} is not allowed to remove service posted by ${doc.postedBy}`)
+                rej(`User ${user} is not allowed to remove this service`)
             }
         }).catch((err) => {
             rej(err);

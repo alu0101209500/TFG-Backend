@@ -31,7 +31,10 @@ function returnCleanUser(nick) {
         "email": "", 
         "fullname": "",
         "registration": 0,
-        "additionalInfo": {}
+        "reviewNumber" : 0,
+        "reviewScore": 0,
+        "icon": "",
+        "description": ""
     }
     return new Promise((res, rej) => {
         userModule.find({username: nick}).then((list) => {
@@ -55,11 +58,12 @@ function validateUser(user, passwd){
             if(list.length == 0) {
                 console.log("no user")
                 rej("No user found");
+            } else {
+                list[0].comparePassword(passwd, (err, isMatch) => {
+                    if(err) throw err;
+                    res(isMatch)
+                });
             }
-            list[0].comparePassword(passwd, (err, isMatch) => {
-                if(err) throw err;
-                res(isMatch)
-            });
         }).catch((err) => {
             rej(err);
         })
@@ -113,6 +117,28 @@ function postNewUser(userInfo) {
     })
 }
 
+function updateProfile(userInfo) {
+    return new Promise((res, rej) => {
+        userModule.find({username: userInfo.authinfo.username}).then((list) => {
+            if(list.length == 0) {
+                console.log("no user")
+                rej("No user found");
+            } else {
+                if(userInfo.icon) {
+                    list[0].icon = userInfo.icon
+                }
+                if(userInfo.description) {
+                    list[0].description = userInfo.description
+                }
+                list[0].save()
+                res()
+            }
+        }).catch((err) => {
+            rej(err);
+        })
+    }) 
+}
+
 function deleteOneUser(nick) {
     return new Promise((res, rej) => {
         if(!nick) {
@@ -138,3 +164,4 @@ exports.postNewUser = postNewUser
 exports.deleteOneUser = deleteOneUser
 exports.validateUser = validateUser
 exports.returnCleanUser = returnCleanUser
+exports.updateProfile = updateProfile

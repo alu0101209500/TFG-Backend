@@ -8,7 +8,10 @@ const UserSchema = new mongoose.Schema({
     password : {type: String, required: true},
     email : String,
     registration : Number,
-    additionalInfo: {type: Object, required: false}
+    reviewNumber : Number,
+    reviewScore: Number,
+    icon: String,
+    description: String
 });
 
 UserSchema.pre('save', function(next) {

@@ -6,6 +6,7 @@ const database = require('../config/database').database
 const userSchema = require('./database/models/userModel').UserSchema
 const servicesSchema = require('./database/models/serviceModel').ServiceSchema
 const utilityFunctions = require("./utils/utilityFunctions");
+const path = require('path');
 
 const app = express();
 
@@ -37,33 +38,26 @@ mongoose.connect(database.remoteUrl , {useNewUrlParser: true,
 
 app.use(express.urlencoded({limit: '200mb', extended: true}));
 app.use(express.json({limit: '200mb'}));
-app.use(express.static(join(__dirname, '../public')));
 app.use(cors());
 
 
 require('./routes/authentication')(app);
-require('./routes/utilities')(app);
+require('./routes/userRoutes')(app);
+require('./routes/servicesRoutes')(app);
 
-app.get("/script/:path", (req, res) => {
-  res.sendFile("/scripts" + req.originalUrl);
-});
-
-app.get("/:path", (req, res) => {
-  let enpoints = ["/", "/signin", "/signup", "/service"]
-  if(req.originalUrl == "/"){
-    res.sendFile("index.html");
+app.get("*", (req, res) => {
+  let endpoints = ["/", "/signin", "/signup", "/service", "/servicePost", "/advancedSearch", "/profilePage"]
+  //console.log(req.originalUrl);
+  if(endpoints.includes(req.originalUrl)) {
+    res.sendFile(path.resolve(__dirname, "../public") + "/index.html")
   } else {
-    res.sendFile(req.originalUrl, (err) => {
+    res.sendFile(path.resolve(__dirname, "../public") + req.originalUrl, (err) => {
       if(err) {
         res.status(404).send("<html><head></head><body><h1>Error 404</h1><br><p>Page not found</p></body></html>")
       }
     });
   }
-});
-
-app.get("*", (req, res) => {
-  //console.log(req.originalUrl);
-  res.status(404).send("<html><head></head><body><h1>Error 404</h1><br><p>Page not found</p></body></html>")
+  
 });
 
 app.listen(3000, "192.168.1.42", () => {

@@ -3,7 +3,6 @@ const middlewares = require('./middlewares');
 const userUtils = require('../database/dbaccess/userUtils');
 const servicesUtils = require('../database/dbaccess/servicesUtils');
 const jwt = require('jsonwebtoken');
-const { reseller } = require("googleapis/build/src/apis/reseller");
 const e = require("express");
 
 const authSecret = 'aJDvksKOndi21FKDSasvbniopADpvi';
