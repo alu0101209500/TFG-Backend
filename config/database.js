@@ -12,6 +12,8 @@ const databaseConnectionOpts = String("authSource=admin").trim();
   remoteUrl : `mongodb://${databaseUser}:${databasePassword}@${databaseHost}:${databasePort}/${databaseName}?${databaseConnectionOpts}`,
   userDB : `mongodb://${databaseUser}:${databasePassword}@${databaseHost}:${databasePort}/users?${databaseConnectionOpts}`,
   servicesDB : `mongodb://${databaseUser}:${databasePassword}@${databaseHost}:${databasePort}/services?${databaseConnectionOpts}`,
+  messagesDB : `mongodb://${databaseUser}:${databasePassword}@${databaseHost}:${databasePort}/messages?${databaseConnectionOpts}`,
+  transactionsDB : `mongodb://${databaseUser}:${databasePassword}@${databaseHost}:${databasePort}/transactions?${databaseConnectionOpts}`,
   localUrl: 'mongodb://localhost:27017/'
 };
 exports.database = database

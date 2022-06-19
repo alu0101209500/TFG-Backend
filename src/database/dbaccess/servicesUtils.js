@@ -24,6 +24,21 @@ function getUserServices(user){
     })
 }
 
+function getServiceById(id){
+    return new Promise((res, rej) => {
+        servicesModule.find({_id: id}).then((list) => {
+            if(list.length <= 0) {
+                rej("No service found with id " + String(id));
+            } else {
+                res(list[0]);
+            }
+        }).catch((err) => {
+            console.log("error");
+            rej(err);
+        })
+    })
+}
+
 function searchServices(query, page, ipp, filters) {
     //Query base
     query= {
@@ -80,7 +95,7 @@ function searchServices(query, page, ipp, filters) {
         }
         query.$and.push(aux)
     }
-    console.log(filters)
+    
     page = Number(page);
     ipp = Number(ipp);
     return new Promise((res, rej) => {
