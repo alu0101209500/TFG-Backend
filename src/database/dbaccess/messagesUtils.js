@@ -90,13 +90,17 @@ function getUserSentMessages(user){
 
 function postNewMessage(user, messageInfo) {
     let now = new Date();
+    let ignoreFromOrigin = false;
+    if(user == "System") {
+        ignoreFromOrigin = true;
+    }
     let newMessage = new messagesModule({
         from: user,
         to: messageInfo.to,
         subject: messageInfo.subject,
         message: messageInfo.message,
         sentAt: now.getTime(),
-        originIgnored: false,
+        originIgnored: ignoreFromOrigin,
         destinationIgnored: false
     });
     return new Promise((res, rej) => {
@@ -115,7 +119,15 @@ function ignoreMessage(user, id) {
         }
         messagesModule.findOne({_id: id}).then((doc) => {
             if(doc.from == user) {
-                if(doc.destinationIgnored == true) {
+                if(doc.to == user) {
+                    messagesModule.deleteOne({_id: id}).then((deletions) => {
+                        if(deletions.deletedCount == 0) {
+                            rej(`Message with id ${id} does not exist`)
+                        } else {
+                            res("Message ignored");
+                        }       
+                    })
+                } else if(doc.destinationIgnored == true) {
                     messagesModule.deleteOne({_id: id}).then((deletions) => {
                         if(deletions.deletedCount == 0) {
                             rej(`Message with id ${id} does not exist`)
@@ -129,7 +141,9 @@ function ignoreMessage(user, id) {
                     res("Message ignored")
                 }
             } else if(doc.to == user) {
-                if(doc.originIgnored == true) {
+                if(doc.from == user) {
+
+                } else if(doc.originIgnored == true) {
                     messagesModule.deleteOne({_id: id}).then((deletions) => {
                         if(deletions.deletedCount == 0) {
                             rej(`Message with id ${id} does not exist`)

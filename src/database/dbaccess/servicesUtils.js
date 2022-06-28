@@ -199,3 +199,4 @@ exports.postNewService = postNewService;
 exports.deleteOneService = deleteOneService;
 exports.deleteUserServices = deleteUserServices;
 exports.addImages = addImages;
+exports.getServiceById = getServiceById;

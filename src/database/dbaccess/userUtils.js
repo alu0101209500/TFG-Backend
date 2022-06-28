@@ -1,3 +1,5 @@
+
+
 let userModule = require("../../index.js").userDB
 
 function getUsers(){
@@ -157,6 +159,23 @@ function deleteOneUser(nick) {
     })
 }
 
+function updateScore(user, value) {
+    return new Promise((res, rej) => {
+        console.log("User: " + user + " || Value: " + String(value))
+        userModule.find({username: user}).then((list) => {
+            if(list.length == 0) {
+                rej("No user found");
+            } else {
+                list[0].reviewNumber = Number(list[0].reviewNumber) + 1;
+                list[0].reviewScore = Number(list[0].reviewScore) + value;
+                list[0].save().then((_) => {res("OK");}).catch((err) => {rej(err)})
+            }
+        }).catch((err) => {
+            rej(err);
+        })
+    })
+}
+
 exports.getUsers = getUsers
 exports.findUserByName = findUserByName
 exports.checkIfValidReg = checkIfValidReg
@@ -165,3 +184,4 @@ exports.deleteOneUser = deleteOneUser
 exports.validateUser = validateUser
 exports.returnCleanUser = returnCleanUser
 exports.updateProfile = updateProfile
+exports.updateScore = updateScore

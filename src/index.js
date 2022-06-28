@@ -47,9 +47,10 @@ require('./routes/authentication')(app);
 require('./routes/userRoutes')(app);
 require('./routes/servicesRoutes')(app);
 require('./routes/messagesRoutes')(app);
+require('./routes/transactionsRoutes')(app);
 
 app.get("*", (req, res) => {
-  let endpoints = ["/", "/signin", "/signup", "/service", "/servicePost", "/advancedSearch", "/profilePage", "/messagesPage"]
+  let endpoints = ["/", "/signin", "/signup", "/service", "/servicePost", "/advancedSearch", "/profilePage", "/messagesPage", "/transactionsPage"]
   if(endpoints.includes(req.originalUrl)) {
     res.sendFile(path.resolve(__dirname, "../public") + "/index.html")
   } else {
