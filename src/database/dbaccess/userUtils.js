@@ -1,5 +1,3 @@
-
-
 let userModule = require("../../index.js").userDB
 
 function getUsers(){

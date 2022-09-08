@@ -322,6 +322,56 @@ function ignoreTransaction(user, id) {
     })
 }
 
+function saleStats(paymentConf) {
+    return new Promise((res, rej) => {
+        let now = new Date().getTime();
+        let vals = []
+        let response = []
+        for(let i = 0; i < 28; i++) {
+            let aux = (now-(27-i)*1000*60*60*24) 
+            let auxDate = new Date(aux)
+            vals.push(aux)
+            response.push({label: auxDate.getDate() + "/" + String(Number(auxDate.getMonth()) + 1), value: 0})
+        }
+        transactionsModule.find({requestedAt: {$gte: (now-(28)*1000*60*60*24)}}).then((list) => {
+            console.log(list)
+            for(let i in list) {
+                if(list[i].status == "closed"){
+                    let listDate = new Date(list[i].requestedAt).getDate();
+                    for(let j in vals) {
+                        let valsDate = new Date(vals[j]).getDate();
+                        if(listDate == valsDate) {
+                            response[j].value += list[i].finalPayment;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            let day = response[27].value;
+            let week = 0;
+            let month = 0;
+            for(let i = 0; i < response.length; i++) {
+                month += response[i].value;
+                if(i >= 21) {
+                    week += response[i].value;
+                }
+            }
+
+            res({
+                day: day,
+                week: week,
+                month: month,
+                comision: paymentConf.value.tasa
+
+            })
+            
+        }).catch((err) => {
+            rej(err);
+        })
+    })
+}
+
 exports.getAllTransactions = getAllTransactions;
 exports.getUserProprietaryTransactions = getUserProprietaryTransactions;
 exports.getUserApplicantTransactions = getUserApplicantTransactions;
@@ -331,3 +381,4 @@ exports.rejectTransaction = rejectTransaction;
 exports.payTransaction = payTransaction;
 exports.cancelTransaction = cancelTransaction;
 exports.ignoreTransaction = ignoreTransaction;
+exports.saleStats = saleStats;

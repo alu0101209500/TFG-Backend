@@ -30,7 +30,7 @@ try {
   exports.messagesDB = messagesDB.model("Messages", messagesSchema);
   exports.transactionsDB = transactionsDB.model("Transactions", transactionsSchema);
 }
-catch {
+catch(err) {
   utilityFunctions.recordLog("[ERROR] - On database connection: " + err);
   console.log("[ERROR] - On database connection: " + err);
 }
@@ -48,6 +48,7 @@ require('./routes/userRoutes')(app);
 require('./routes/servicesRoutes')(app);
 require('./routes/messagesRoutes')(app);
 require('./routes/transactionsRoutes')(app);
+require('./routes/adminRoutes')(app);
 
 app.get("*", (req, res) => {
   let endpoints = ["/", "/signin", "/signup", "/service", "/servicePost", "/advancedSearch", "/profilePage", "/messagesPage", "/transactionsPage"]
@@ -60,10 +61,9 @@ app.get("*", (req, res) => {
       }
     });
   }
-  
 });
 
-app.listen(3000, "192.168.1.42", () => {
+app.listen(3000, "192.168.1.47", () => {
   console.log("Server a la escucha en el puerto 3000");
   utilityFunctions.recordLog(`[INFO] - Server started at ${new Date().toString()}`);
 });
